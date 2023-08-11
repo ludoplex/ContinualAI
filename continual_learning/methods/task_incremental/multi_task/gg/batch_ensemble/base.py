@@ -50,5 +50,4 @@ class BElayer(nn.Module):
             gamma = gamma.unsqueeze(-1).unsqueeze(-1)
 
         x = x * alpha
-        output = self.layer(x) * gamma
-        return output
+        return self.layer(x) * gamma

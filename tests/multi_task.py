@@ -28,7 +28,11 @@ class Multi_Task_tests(unittest.TestCase):
 
         for t in mt:
             l = len(t.get_indexes(DatasetSplits.ALL))
-            l1 = sum([len(t.get_indexes(s)) for s in DatasetSplits if s != DatasetSplits.ALL])
+            l1 = sum(
+                len(t.get_indexes(s))
+                for s in DatasetSplits
+                if s != DatasetSplits.ALL
+            )
             self.assertTrue(l == l1)
 
             ss.append(set(t.get_indexes(DatasetSplits.ALL)))
@@ -49,7 +53,11 @@ class Multi_Task_tests(unittest.TestCase):
 
         for t in mt:
             l = len(t.get_indexes(DatasetSplits.ALL))
-            l1 = sum([len(t.get_indexes(s)) for s in DatasetSplits if s != DatasetSplits.ALL])
+            l1 = sum(
+                len(t.get_indexes(s))
+                for s in DatasetSplits
+                if s != DatasetSplits.ALL
+            )
             self.assertTrue(l == l1)
 
             s += len(t.get_indexes(DatasetSplits.ALL))
@@ -68,7 +76,11 @@ class Multi_Task_tests(unittest.TestCase):
         s = 0
         for t in mt:
             l = len(t.get_indexes(DatasetSplits.ALL))
-            l1 = sum([len(t.get_indexes(s)) for s in DatasetSplits if s != DatasetSplits.ALL])
+            l1 = sum(
+                len(t.get_indexes(s))
+                for s in DatasetSplits
+                if s != DatasetSplits.ALL
+            )
             self.assertTrue(l == l1)
 
             s += len(t.get_indexes(DatasetSplits.ALL))

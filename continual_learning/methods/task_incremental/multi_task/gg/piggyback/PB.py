@@ -28,13 +28,11 @@ class PiggyBack(BaseMultiTaskGGMethod):
         print(model)
 
     def get_parameters(self, task: Task, backbone: nn.Module, solver: Solver):
-        parameters = []
-
-        for n, m in backbone.named_modules():
-            if isinstance(m, PiggyBackLayer):
-                parameters.append(m.mask)
-
-        return parameters
+        return [
+            m.mask
+            for n, m in backbone.named_modules()
+            if isinstance(m, PiggyBackLayer)
+        ]
 
     def set_task(self, backbone: nn.Module, task: Task, **kwargs):
         task_i = task.index

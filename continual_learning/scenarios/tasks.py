@@ -45,10 +45,7 @@ class Task(AbstractTask):
 
     @property
     def classes(self):
-        if self._task_labels:
-            return self.task_labels
-        else:
-            return self.dataset_labels
+        return self.task_labels if self._task_labels else self.dataset_labels
 
     def _map_labels(self, y):
         if self.labels_mapping is None:
@@ -56,10 +53,10 @@ class Task(AbstractTask):
 
         if isinstance(self.labels_mapping, dict):
             if self._task_labels:
-                if not isinstance(y, list):
-                    y = self.labels_mapping[y]
-                else:
+                if isinstance(y, list):
                     y = [self.labels_mapping[i] for i in y]
+                else:
+                    y = self.labels_mapping[y]
         else:
             y = list(map(self.labels_mapping, y))
 
@@ -69,10 +66,7 @@ class Task(AbstractTask):
     def targets(self):
         base_target = self.base_dataset.targets
 
-        if base_target is not None:
-            return self._map_labels(base_target)
-
-        return None
+        return self._map_labels(base_target) if base_target is not None else None
 
     @property
     def values(self):
@@ -93,10 +87,7 @@ class Task(AbstractTask):
         else:
             i, x = a
 
-        if y is not None:
-            return i, x, y
-
-        return i, x
+        return (i, x, y) if y is not None else (i, x)
 
 
 class TransformerTask(Task):
@@ -137,10 +128,7 @@ class TransformerTask(Task):
         else:
             x = self.transformer(x)
 
-        if y is not None:
-            return i, x, y
-
-        return i, x
+        return (i, x, y) if y is not None else (i, x)
 
 
 class SupervisedTransformerTask(Task):

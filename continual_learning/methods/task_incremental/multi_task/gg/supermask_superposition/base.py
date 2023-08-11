@@ -9,8 +9,7 @@ class GetSubnet(autograd.Function):
     @staticmethod
     def forward(ctx, scores, pruning_percentage):
         threshold = torch.quantile(scores.abs(), q=pruning_percentage)
-        mask = torch.ge(scores, threshold).float()
-        return mask
+        return torch.ge(scores, threshold).float()
 
     @staticmethod
     def backward(ctx, g):

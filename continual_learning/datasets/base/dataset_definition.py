@@ -65,24 +65,24 @@ class BaseDataset(AbstractDataset):
 
         if targets is None:
             self.dataset_type = DatasetType.UNSUPERVISED
-        else:
-            if len(targets) != len(values):
-                raise ValueError(f'The len of values ({len(values)}) '
-                                 f'and targets ({len(targets)}) '
-                                 f'are different.')
-
+        elif len(targets) == len(values):
             self.dataset_type = DatasetType.SUPERVISED
+
+        else:
+            raise ValueError(f'The len of values ({len(values)}) '
+                             f'and targets ({len(targets)}) '
+                             f'are different.')
 
         self.images_path = images_path
         self.is_path_dataset = is_path_dataset
         self.path_loading_function = path_loading_function \
-            if path_loading_function is not None else path_image_loading
+                if path_loading_function is not None else path_image_loading
 
         self.transform = transform \
-            if transform is not None else lambda z: z
+                if transform is not None else lambda z: z
 
         self.target_transform = target_transform \
-            if target_transform is not None else lambda z: z
+                if target_transform is not None else lambda z: z
 
         self._use_transform = True
 
@@ -95,9 +95,7 @@ class BaseDataset(AbstractDataset):
 
     @property
     def classes(self):
-        if self.targets is None:
-            return None
-        return sorted(list(set(self.targets)))
+        return None if self.targets is None else sorted(list(set(self.targets)))
 
     @property
     def values(self):
@@ -105,9 +103,7 @@ class BaseDataset(AbstractDataset):
 
     @property
     def targets(self):
-        if self.dataset_type != DatasetType.SUPERVISED:
-            return None
-        return self._targets
+        return None if self.dataset_type != DatasetType.SUPERVISED else self._targets
 
     def __len__(self):
         return len(self.values)
@@ -213,9 +209,7 @@ class DatasetSubset(BaseDataset):
 
     @property
     def classes(self):
-        if self.targets is None:
-            return None
-        return sorted(list(set(self.targets)))
+        return None if self.targets is None else sorted(list(set(self.targets)))
 
     @property
     def values(self):
@@ -277,15 +271,15 @@ class DatasetSplitsContainer(AbstractDataset):
                              'but test_transform is None. '
                              'Please proved both or none. ')
 
-        if (values is None and base_dataset is None) and \
-                any([not isinstance(s, AbstractDataset)
-                     for s in [train, test, dev]]):
+        if (values is None and base_dataset is None) and any(
+            not isinstance(s, AbstractDataset) for s in [train, test, dev]
+        ):
             raise ValueError('You passed indexes as input but'
                              ' value and base_dataset parameter are None. '
                              'Please proved one of them.')
 
         if base_dataset is not None and \
-                (values is not None or targets is not None):
+                    (values is not None or targets is not None):
             raise ValueError('Base dataset is not None but one, or both, '
                              'values and targets are note None. '
                              'PLease set both to none to use the base dataset.')
@@ -345,7 +339,7 @@ class DatasetSplitsContainer(AbstractDataset):
             d_dev = dev
 
         self._splits = \
-            {
+                {
                 DatasetSplits.TRAIN: d_train,
                 DatasetSplits.TEST: d_test,
                 DatasetSplits.DEV: d_dev,
@@ -379,9 +373,7 @@ class DatasetSplitsContainer(AbstractDataset):
     @property
     def classes(self):
         targets = self.current_dataset.targets
-        if targets is None:
-            return None
-        return sorted(list(set(targets)))
+        return None if targets is None else sorted(list(set(targets)))
 
     @property
     def values(self):
@@ -512,12 +504,11 @@ class DownloadableDataset(DatasetSplitsContainer, ABC):
             if not download_if_missing:
                 raise IOError("Data not found and "
                               "`download_if_missing` is False")
-            else:
-                if not exists(self.data_folder):
-                    makedirs(self.data_folder)
+            if not exists(self.data_folder):
+                makedirs(self.data_folder)
 
-                print('Downloading dataset {}'.format(self.name))
-                self.download_dataset()
+            print(f'Downloading dataset {self.name}')
+            self.download_dataset()
 
         values, (train, test, dev) = self.load_dataset()
 

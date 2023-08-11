@@ -64,15 +64,14 @@ class NCTransformingScenario(TasksGenerator):
             labels_task_mapping = {l: list(range(tasks_n))
                                    for l in dataset_labels}
 
-        if not all(label in dataset_labels
-                   for label, task in labels_task_mapping.items()):
+        if any(label not in dataset_labels for label in labels_task_mapping):
             raise ValueError(f'Some labels in labels_task_mapping are not '
                              f'present in the dataset. '
                              f'Dataset labels: {dataset_labels}, '
                              f'given labels: {labels_task_mapping}')
 
         if max(labels_task_mapping.keys()) > len(dataset_labels) - 1 \
-                or min(labels_task_mapping.keys()) < 0:
+                    or min(labels_task_mapping.keys()) < 0:
             raise ValueError('Invalid key value in labels_task_mapping. '
                              f'The keys must be in  '
                              f'[0, {len(dataset_labels) - 1}] '
@@ -107,7 +106,7 @@ class NCTransformingScenario(TasksGenerator):
 
         if not remap_labels_across_task:
             lens = {k: len(v) for k, v in task_labels.items()}
-            if any([l == 1 for l in lens.values()]):
+            if any(l == 1 for l in lens.values()):
                 raise ValueError('Some task has only one class but '
                                  'remap_labels_across_task=False. '
                                  'Please populate the task by setting'

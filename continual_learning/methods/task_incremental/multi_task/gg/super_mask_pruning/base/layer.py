@@ -30,12 +30,14 @@ class EnsembleMaskedWrapper(nn.Module):
         where = where.lower()
         # if not where == 'weights':
 
-        if where == 'output':
-            mask_dim = (1, mask_dim[0])
-        elif where == 'inuput':
+        if where == 'inuput':
             mask_dim = (1, mask_dim[1])
+        elif where == 'output':
+            mask_dim = (1, mask_dim[0])
         else:
-            assert False, 'The following types are allowed: output, input and weights. {} given'.format(where)
+            assert (
+                False
+            ), f'The following types are allowed: output, input and weights. {where} given'
 
         if self.is_conv:
             mask_dim = mask_dim + (1, 1)
@@ -114,13 +116,11 @@ class EnsembleMaskedWrapper(nn.Module):
         if not self.apply_mask:
             return 1
 
-        if self._current_distribution < 0:
-            masks = [d(reduce=True) for d in self.task_distributions]
-            m = torch.mean(torch.stack(masks), 0)
-        else:
-            m = self.task_distributions[self._current_distribution](reduce=True)
+        if self._current_distribution >= 0:
+            return self.task_distributions[self._current_distribution](reduce=True)
 
-        return m
+        masks = [d(reduce=True) for d in self.task_distributions]
+        return torch.mean(torch.stack(masks), 0)
 
     def eval(self):
         self._eval_mask = self.mask
@@ -162,7 +162,5 @@ class EnsembleMaskedWrapper(nn.Module):
         return o
 
     def __repr__(self):
-        return 'Supermask {} layer with distribution {}. ' \
-               'Original layer: {} '.format('structured' if self.where != 'weights' else 'unstructured',
-                                            self.task_distributions, self.layer.__repr__())
+        return f"Supermask {'structured' if self.where != 'weights' else 'unstructured'} layer with distribution {self.task_distributions}. Original layer: {self.layer.__repr__()} "
 

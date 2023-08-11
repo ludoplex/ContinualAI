@@ -24,9 +24,7 @@ def get_accuracy(encoder: torch.nn.Module, solver: torch.nn.Module,
             predicted_labels.extend(a.max(dim=1)[1].tolist())
     true_labels, predicted_labels = np.asarray(true_labels), np.asarray(predicted_labels)
     eq = predicted_labels == true_labels
-    accuracy = eq.sum() / len(eq)
-
-    return accuracy
+    return eq.sum() / len(eq)
 
 
 class PrunedLayer(nn.Module):
@@ -65,13 +63,19 @@ class PrunedLayer(nn.Module):
         if mask is not None:
             w = w * mask
 
-        if self.is_conv:
-            o = nn.functional.conv2d(x, w, None, stride=self.layer.stride, padding=self.layer.padding,
-                                     dilation=self.layer.dilation, groups=self.layer.groups)
-        else:
-            o = nn.functional.linear(x, w, None)
-
-        return o
+        return (
+            nn.functional.conv2d(
+                x,
+                w,
+                None,
+                stride=self.layer.stride,
+                padding=self.layer.padding,
+                dilation=self.layer.dilation,
+                groups=self.layer.groups,
+            )
+            if self.is_conv
+            else nn.functional.linear(x, w, None)
+        )
 
 
 class ForwardHook:

@@ -116,10 +116,7 @@ class SuperMask(BaseMultiTaskGGMethod):
         for name, ms in r:
             m = None
             for _m in ms:
-                if m is None:
-                    m = _m
-                else:
-                    m = torch.logical_or(m, _m)
+                m = _m if m is None else torch.logical_or(m, _m)
             final_masks[name] = m
 
         return final_masks

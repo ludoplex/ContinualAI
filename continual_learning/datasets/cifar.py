@@ -43,11 +43,7 @@ class CIFAR10(DownloadableDataset):
                         entry = pickle.load(contentfobj, encoding='latin1')
                         if 'data' in entry:
                             x = entry['data']
-                            if self.fine_labels:
-                                y = entry['fine_labels']
-                            else:
-                                y = entry['labels']
-
+                            y = entry['fine_labels'] if self.fine_labels else entry['labels']
                             if name in self.files['train']:
                                 x_train.append(x)
                                 y_train.append(y)

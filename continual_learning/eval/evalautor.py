@@ -105,16 +105,10 @@ class Evaluator:
         return res
 
     def others_metrics_results(self) -> dict:
-        res = {}
-        for name, m in self._others_metrics:
-            res[name] = m()
-        return res
+        return {name: m() for name, m in self._others_metrics}
 
     def custom_metrics_results(self) -> dict:
-        res = {}
-        for name, m in self._others_metrics:
-            res[name] = m()
-        return res
+        return {name: m() for name, m in self._others_metrics}
 
     @property
     def classification_metrics(self) -> List[str]:
@@ -249,9 +243,9 @@ class ExperimentsContainer:
 
         tasks_scores = defaultdict(lambda: defaultdict(list))
 
-        for exp_n in range(len(task_results)):
+        for task_result in task_results:
             _tasks = defaultdict(list)
-            for metric, results in task_results[exp_n].items():
+            for metric, results in task_result.items():
                 for task, scores in results.items():
                     tasks_scores[metric][task].append(scores)
 
@@ -260,25 +254,22 @@ class ExperimentsContainer:
 
         tasks_scores = defaultdict(list)
 
-        for exp_n in range(len(task_results)):
-            for metric, results in task_results[exp_n].items():
+        for task_result in task_results:
+            for metric, results in task_result.items():
                 tasks_scores[metric].append(results)
 
-        scores = {}
-        for metric, v in tasks_scores.items():
-            # print(metric)
-            # for i, v in t.items():
-            scores[metric] = {'mean': np.asarray(v).mean(0), 'std': np.asarray(v).std(0)}
-
-        return scores
+        return {
+            metric: {'mean': np.asarray(v).mean(0), 'std': np.asarray(v).std(0)}
+            for metric, v in tasks_scores.items()
+        }
 
     def task_scores(self):
         task_results = [i.classification_results() for i in self._experiments_results]
 
         tasks_scores = defaultdict(lambda: defaultdict(list))
 
-        for exp_n in range(len(task_results)):
-            for metric, results in task_results[exp_n].items():
+        for task_result in task_results:
+            for metric, results in task_result.items():
                 for task, scores in results.items():
                     tasks_scores[metric][task].append(scores)
 
@@ -294,8 +285,8 @@ class ExperimentsContainer:
 
         res = defaultdict(lambda: defaultdict(list))
 
-        for exp_n in range(len(cl_results)):
-            for metric, v in cl_results[exp_n].items():
+        for cl_result in cl_results:
+            for metric, v in cl_result.items():
                 for cl_metric, r in v.items():
                     res[metric][cl_metric].append(r)
 
@@ -311,14 +302,12 @@ class ExperimentsContainer:
 
         res = defaultdict(list)
 
-        for exp_n in range(len(cl_results)):
-            for metric, v in cl_results[exp_n].items():
+        for cl_result in cl_results:
+            for metric, v in cl_result.items():
                 # for cl_metric, r in v.items():
                 res[metric].append(v)
 
-        metrics = dict()
-        for metric, v in res.items():
-            # for i, v in t.items():
-            metrics[metric] = {'mean': np.asarray(v).mean(0), 'std': np.asarray(v).std(0)}
-
-        return metrics
+        return {
+            metric: {'mean': np.asarray(v).mean(0), 'std': np.asarray(v).std(0)}
+            for metric, v in res.items()
+        }

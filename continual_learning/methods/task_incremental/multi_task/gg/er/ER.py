@@ -41,7 +41,7 @@ class EmbeddingRegularization(BaseMultiTaskGGMethod):
         self.importance = importance
 
         # TODO: messaggio
-        assert distance in ['cosine', 'euclidean']
+        assert distance in {'cosine', 'euclidean'}
         self.distance = distance
 
         # self._supervised = config.get('_supervised', True)
@@ -53,8 +53,9 @@ class EmbeddingRegularization(BaseMultiTaskGGMethod):
         elif isinstance(random_state, np.random.RandomState):
             self.RandomState = random_state
         else:
-            raise ValueError("random_state can be None, Int or numpy RandomState object, an {} was give"
-                             .format(type(random_state)))
+            raise ValueError(
+                f"random_state can be None, Int or numpy RandomState object, an {type(random_state)} was give"
+            )
 
         self.task_memory = []
 

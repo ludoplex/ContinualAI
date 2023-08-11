@@ -67,11 +67,7 @@ def get_masks_from_gradients(gradients,
             if name in past_masks and hard_pruning:
                 masked = torch.masked_select(gs.view(-1),
                                              past_masks[name].view(-1).bool())
-                if len(masked) == 0:
-                    thres = 0
-                else:
-                    thres = torch.quantile(masked, prune_percentage)
-
+                thres = 0 if len(masked) == 0 else torch.quantile(masked, prune_percentage)
             else:
                 thres = torch.quantile(gs.view(-1), prune_percentage)
                 # print(thres, gs.mean(), gs.std(), '\n', gs.view(-1))
@@ -81,8 +77,8 @@ def get_masks_from_gradients(gradients,
             mask = torch.ge(gs, thres).float().to(device)
             masks[name] = mask
 
-        # masks = {name: torch.ge(gs, torch.quantile(gs, prune_percentage)).float().to(device)
-        #          for name, gs in gradients.items()}
+            # masks = {name: torch.ge(gs, torch.quantile(gs, prune_percentage)).float().to(device)
+            #          for name, gs in gradients.items()}
 
     # for name, mask in masks.items():
     #     mask = mask.squeeze()
@@ -112,7 +108,7 @@ def mask_training(model, solver, epochs, dataset, device='cpu', parameters=None)
     model.train()
     solver.train()
 
-    for e in bar:
+    for _ in bar:
         losses = []
         for _, x, y in dataset:
             x, y = x.to(device), y.to(device)

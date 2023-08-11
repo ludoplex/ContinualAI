@@ -36,9 +36,7 @@ class MNIST_tests(unittest.TestCase):
     def test_iteration(self):
         d = self.dataset_class(download_if_missing=True, data_folder=self.data_folder)
         d.test()
-        i = 0
-        for _, x, y in d:
-            i += 1
+        i = sum(1 for _, x, y in d)
         self.assertTrue(i == len(d))
         d.all()
         for i, (_, x, y) in enumerate(d):
@@ -104,8 +102,6 @@ class MNIST_tests(unittest.TestCase):
                                target_transformer=tt)
         try:
             dataset = d.get_iterator(batch_size=64)
-            for i in dataset:
-                pass
         except Exception as e:
             self.assertTrue(False)
 

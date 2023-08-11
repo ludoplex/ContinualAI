@@ -21,7 +21,7 @@ class Container(object):
         self.current_epoch = None
         self.num_tasks = None
 
-        self.others_parameters = dict()
+        self.others_parameters = {}
 
 
 class BaseMethod(ABC, torch.nn.Module):

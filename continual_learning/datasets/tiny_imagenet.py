@@ -105,6 +105,4 @@ class TinyImagenet(DownloadableDataset):
 
     def _check_exists(self) -> bool:
         name = self.url.rpartition('/')[2]
-        if not exists(os.path.join(self.data_folder, name)):
-            return False
-        return True
+        return bool(exists(os.path.join(self.data_folder, name)))

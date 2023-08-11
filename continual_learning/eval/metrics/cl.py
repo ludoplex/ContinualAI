@@ -28,14 +28,10 @@ class LastBackwardTransfer(ContinualLearningMetric):
         if T == 1:
             return 1
 
-        v = 0
         last = r[-1, :]
 
-        for i in range(T - 1):
-            v += (last[i] - r[i, i])
-        v = v / (T - 1)
-
-        return v
+        v = sum((last[i] - r[i, i]) for i in range(T - 1))
+        return v / (T - 1)
 
 
 class FinalAccuracy(ContinualLearningMetric):

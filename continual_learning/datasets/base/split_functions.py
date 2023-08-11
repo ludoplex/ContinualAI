@@ -265,17 +265,13 @@ def add_dev_split_to_container(dataset: DatasetSplitsContainer,
 
     dev = dataset.dev_split()
     if len(dev) > 0:
-        raise ValueError(f'The dataset already has a dev split')
+        raise ValueError('The dataset already has a dev split')
 
     if from_test and len(dataset.test_split()) == 0:
         raise ValueError(f'The parameter from_test is set to True but'
                          f' the dataset hasn\'t  a dev split.')
 
-    if from_test:
-        source = dataset.test_split()
-    else:
-        source = dataset.train_split()
-
+    source = dataset.test_split() if from_test else dataset.train_split()
     index_list = np.arange(len(source))
     random_state.shuffle(index_list)
 

@@ -73,7 +73,7 @@ class TrainableBeta(TrainableMask):
         return kl
 
     def __repr__(self):
-        return '{}(a={}, b={})'.format(self.__class__.__name__, tuple(self.a.shape), tuple(self.b.shape))
+        return f'{self.__class__.__name__}(a={tuple(self.a.shape)}, b={tuple(self.b.shape)})'
 
 
 class TrainableGamma(TrainableMask):
@@ -103,7 +103,7 @@ class TrainableGamma(TrainableMask):
         return kl
 
     def __repr__(self):
-        return '{}(a={}, b={})'.format(self.__class__.__name__, tuple(self.a.shape), tuple(self.b.shape))
+        return f'{self.__class__.__name__}(a={tuple(self.a.shape)}, b={tuple(self.b.shape)})'
 
 
 class TrainableLaplace(TrainableMask):
@@ -131,7 +131,7 @@ class TrainableLaplace(TrainableMask):
         return kl
 
     def __repr__(self):
-        return '{}(a={}, b={})'.format(self.__class__.__name__, tuple(self.mu.shape), tuple(self.b.shape))
+        return f'{self.__class__.__name__}(a={tuple(self.mu.shape)}, b={tuple(self.b.shape)})'
 
 
 class TrainableNormal(TrainableMask):
@@ -159,7 +159,7 @@ class TrainableNormal(TrainableMask):
         return kl
 
     def __repr__(self):
-        return '{}(a={}, b={})'.format(self.__class__.__name__, tuple(self.mu.shape), tuple(self.b.shape))
+        return f'{self.__class__.__name__}(a={tuple(self.mu.shape)}, b={tuple(self.b.shape)})'
 
 
 class TrainableWeights(TrainableMask):
@@ -175,7 +175,7 @@ class TrainableWeights(TrainableMask):
         return 0
 
     def __repr__(self):
-        return '{}(dim={})'.format(self.__class__.__name__, tuple(self.w.shape))
+        return f'{self.__class__.__name__}(dim={tuple(self.w.shape)})'
 
 
 class TrainableExponential(TrainableMask):
@@ -205,4 +205,4 @@ class TrainableExponential(TrainableMask):
         return kl
 
     def __repr__(self):
-        return '{}(l={})'.format(self.__class__.__name__, tuple(self.l.shape))
+        return f'{self.__class__.__name__}(l={tuple(self.l.shape)})'

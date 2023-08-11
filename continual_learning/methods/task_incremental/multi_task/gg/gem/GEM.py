@@ -39,8 +39,9 @@ class GradientEpisodicMemory(BaseMultiTaskGGMethod):
         elif isinstance(random_state, np.random.RandomState):
             self.RandomState = random_state
         else:
-            raise ValueError("random_state can be None, Int or numpy RandomState object, an {} was give"
-                             .format(type(random_state)))
+            raise ValueError(
+                f"random_state can be None, Int or numpy RandomState object, an {type(random_state)} was give"
+            )
 
         self.task_memory = []
         self.loss_f = nn.CrossEntropyLoss(reduction='mean')
@@ -69,71 +70,68 @@ class GradientEpisodicMemory(BaseMultiTaskGGMethod):
 
     def after_gradient_calculation(self, encoder: torch.nn.Module, solver, *args, **kwargs):
 
-        if len(self.task_memory) > 0:
-            named_parameters = dict(itertools.chain(encoder.named_parameters(),))
+        if len(self.task_memory) <= 0:
+            return
+        named_parameters = dict(itertools.chain(encoder.named_parameters(),))
 
-            current_gradients = {}
+        current_gradients = {
+            n: deepcopy(p.grad.data.view(-1).cpu())
+            for n, p in named_parameters.items()
+            if p.requires_grad and p.grad is not None
+        }
+        tasks_gradients = {}
 
-            for n, p in named_parameters.items():
-                if p.requires_grad and p.grad is not None:
-                    current_gradients[n] = deepcopy(p.grad.data.view(-1).cpu())
+        for i, t in enumerate(self.task_memory):
 
-            tasks_gradients = {}
-
-            for i, t in enumerate(self.task_memory):
-
-                encoder.train()
-                solver.eval()
-
-                encoder.zero_grad()
-                solver.zero_grad()
-
-                index, image, label = t
-                emb = encoder(image)
-                o = solver(emb, task=i)
-
-                loss = self.loss_f(o, label)
-                loss.backward()
-
-                gradients = {}
-                for n, p in named_parameters.items():
-                    if p.requires_grad and p.grad is not None:
-                        gradients[n] = p.grad.data.view(-1).cpu()
-
-                tasks_gradients[i] = deepcopy(gradients)
+            encoder.train()
+            solver.eval()
 
             encoder.zero_grad()
             solver.zero_grad()
-            done = False
 
-            for n, cg in current_gradients.items():
-                tg = []
-                for t, tgs in tasks_gradients.items():
-                    tg.append(tgs[n])
+            index, image, label = t
+            emb = encoder(image)
+            o = solver(emb, task=i)
 
-                tg = torch.stack(tg, 1).cpu()
-                a = torch.mm(cg.unsqueeze(0), tg)
+            loss = self.loss_f(o, label)
+            loss.backward()
 
-                if (a < 0).sum() != 0:
-                    done = True
-                    cg_np = cg.unsqueeze(1).cpu().contiguous().numpy().astype(np.double)
-                    tg = tg.numpy().transpose().astype(np.double)
+            gradients = {
+                n: p.grad.data.view(-1).cpu()
+                for n, p in named_parameters.items()
+                if p.requires_grad and p.grad is not None
+            }
+            tasks_gradients[i] = deepcopy(gradients)
 
-                    try:
-                        v = qp(tg, cg_np, self.margin)
+        encoder.zero_grad()
+        solver.zero_grad()
+        done = False
 
-                        cg_np += np.expand_dims(np.dot(v, tg), 1)
+        for n, cg in current_gradients.items():
+            tg = [tgs[n] for tgs in tasks_gradients.values()]
+            tg = torch.stack(tg, 1).cpu()
+            a = torch.mm(cg.unsqueeze(0), tg)
 
-                        del tg
+            if (a < 0).sum() != 0:
+                done = True
+                cg_np = cg.unsqueeze(1).cpu().contiguous().numpy().astype(np.double)
+                tg = tg.numpy().transpose().astype(np.double)
 
-                        p = named_parameters[n]
-                        p.grad.data.copy_(torch.from_numpy(cg_np).view(p.size()))
+                try:
+                    v = qp(tg, cg_np, self.margin)
 
-                    except Exception as e:
-                        print(e)
+                    cg_np += np.expand_dims(np.dot(v, tg), 1)
 
-            if not done:
-                for n, p in named_parameters.items():
-                    if p.requires_grad and p.grad is not None:
-                        p.grad.copy_(current_gradients[n].view(p.grad.data.size()).cpu())
+                    del tg
+
+                    p = named_parameters[n]
+                    p.grad.data.copy_(torch.from_numpy(cg_np).view(p.size()))
+
+                except Exception as e:
+                    print(e)
+
+        if not done:
+            for n, p in named_parameters.items():
+                if p.requires_grad and p.grad is not None:
+                    p.grad.copy_(current_gradients[n].view(p.grad.data.size()).cpu())
 

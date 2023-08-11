@@ -31,7 +31,7 @@ author, Yerlan Idelbayev.
 
 
 def _weights_init(m):
-    if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
+    if isinstance(m, (nn.Linear, nn.Conv2d)):
         init.kaiming_normal_(m.weight)
 
 
@@ -150,10 +150,7 @@ class ResNet(nn.Module):
 
 
 def resnet20(use_bn=True):
-    if use_bn:
-        block = NoBNBlock
-    else:
-        block = BasicBlock
+    block = NoBNBlock if use_bn else BasicBlock
     return ResNet(block, [3, 3, 3])
 
 

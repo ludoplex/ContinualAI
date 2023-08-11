@@ -66,9 +66,9 @@ class NCScenario(TasksGenerator):
                              for i in range(tasks_n)
                              if i not in labels_per_tasks}
 
-                labels_per_tasks.update(tasks_map)
+                labels_per_tasks |= tasks_map
 
-                if any([v == 1 for v in labels_per_tasks.values()]):
+                if any(v == 1 for v in labels_per_tasks.values()):
                     raise ValueError('Due to the lack of tasks '
                                      'in labels_per_tasks, '
                                      'the dictionary has been populated, '
@@ -101,23 +101,22 @@ class NCScenario(TasksGenerator):
                              f'({sm}) exceeds the number of labels '
                              f'in the dataset ({len(dataset_labels)}).')
 
-        if not all(label in dataset_labels
-                   for label, task in labels_task_mapping.items()):
+        if any(label not in dataset_labels for label in labels_task_mapping):
             raise ValueError(f'Some labels in labels_task_mapping are not '
                              f'present in the dataset. '
                              f'Dataset labels: {dataset_labels}, '
                              f'given labels: {labels_task_mapping}')
 
-        if len(labels_task_mapping) > 0:
+        if labels_task_mapping:
             if max(labels_task_mapping.keys()) > len(dataset_labels) - 1 \
-                    or min(labels_task_mapping.keys()) < 0:
+                        or min(labels_task_mapping.keys()) < 0:
                 raise ValueError('Invalid key value in labels_task_mapping. '
                                  f'The keys must be in  '
                                  f'[0, {len(dataset_labels) - 1}] '
                                  f'({labels_task_mapping.keys()})')
 
             if max(labels_task_mapping.values()) >= tasks_n \
-                    or min(labels_per_tasks.values()) < 0:
+                        or min(labels_per_tasks.values()) < 0:
                 raise ValueError('Invalid value in labels_task_mapping. '
                                  f'The values must be in  [0, {tasks_n - 1}] '
                                  f'({labels_task_mapping.values()})')
@@ -128,8 +127,7 @@ class NCScenario(TasksGenerator):
             task_labels[task].append(label)
             assigned_labels.append(label)
 
-        if any([len(v) > labels_per_tasks[t]
-                for t, v in task_labels.items()]):
+        if any(len(v) > labels_per_tasks[t] for t, v in task_labels.items()):
             s = {t: len(v) for t, v in task_labels.items()}
             raise ValueError(f'After populating the tasks '
                              f'using labels_task_mapping, some task has more '

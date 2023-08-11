@@ -47,16 +47,20 @@ class PiggyBackLayer(nn.Module):
         if self.mask is not None:
             w = w * self.mask
 
-        if self.is_conv:
-            o = nn.functional.conv2d(x, w, self.layer.bias, stride=self.layer.stride, padding=self.layer.padding,
-                                     dilation=self.layer.dilation, groups=self.layer.groups)
-        else:
-            o = nn.functional.linear(x, w, self.layer.bias)
-
-        return o
+        return (
+            nn.functional.conv2d(
+                x,
+                w,
+                self.layer.bias,
+                stride=self.layer.stride,
+                padding=self.layer.padding,
+                dilation=self.layer.dilation,
+                groups=self.layer.groups,
+            )
+            if self.is_conv
+            else nn.functional.linear(x, w, self.layer.bias)
+        )
 
     @property
     def __repr__(self):
-        return 'Supermask {} layer with distribution {}. ' \
-               'Original layer: {} '.format('structured' if self.where != 'weights' else 'unstructured',
-                                            self.task_distributions, self.layer.__repr__)
+        return f"Supermask {'structured' if self.where != 'weights' else 'unstructured'} layer with distribution {self.task_distributions}. Original layer: {self.layer.__repr__} "

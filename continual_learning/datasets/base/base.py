@@ -121,11 +121,8 @@ class IndexesContainer(object):
 
     def get_split_len(self, v: DatasetSplits = None) -> int:
         if v == DatasetSplits.ALL:
-            return sum(map(len, [v for v in self._splits.values()]))
-        if v is None:
-            return self.current_split
-
-        return len(self._splits[v])
+            return sum(map(len, list(self._splits.values())))
+        return self.current_split if v is None else len(self._splits[v])
 
     @property
     def current_indexes(self) -> np.ndarray:
@@ -415,8 +412,7 @@ class   SupervisedDataset(UnsupervisedDataset):
 
         self._labels = tuple(sorted(list(labels)))
 
-    def __getitem__(self, item: Union[slice, int, list, np.ndarray]) -> \
-            Tuple[Sequence[int], Sequence[Any], Sequence[Any]]:
+    def __getitem__(self, item: Union[slice, int, list, np.ndarray]) -> Tuple[Sequence[int], Sequence[Any], Sequence[Any]]:
 
         """
         Given an index, or a list of indexes (defined as list, tuple o slice), return the associated samples.
@@ -424,11 +420,7 @@ class   SupervisedDataset(UnsupervisedDataset):
         :return: Return :param item: and the associated samples, x and y, modified by the transformer function.
         """
 
-        to_map = False
-
-        if not isinstance(item, (np.integer, int)):
-            to_map = True
-
+        to_map = not isinstance(item, (np.integer, int))
         item, x = super().__getitem__(item)
 
         idx = self.current_indexes[item]

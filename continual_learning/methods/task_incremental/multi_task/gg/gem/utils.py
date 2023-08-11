@@ -10,5 +10,4 @@ def qp(past_tasks_gradient, current_gradient, margin):
     q = np.squeeze(q, 1)
     h = np.zeros(t) + margin
     G = np.eye(t)
-    v = quadprog.solve_qp(P, q, G, h)[0]
-    return v
+    return quadprog.solve_qp(P, q, G, h)[0]

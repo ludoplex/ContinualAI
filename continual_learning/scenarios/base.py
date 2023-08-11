@@ -274,12 +274,11 @@ class TasksGenerator(ABC):
 
         super().__init__()
 
-        if random_state is not None:
-            if isinstance(random_state, int):
-                random_state = np.random.RandomState(random_state)
-        else:
+        if random_state is None:
             random_state = np.random.RandomState(None)
 
+        elif isinstance(random_state, int):
+            random_state = np.random.RandomState(random_state)
         self.dataset = dataset
         self.random_state = random_state
 

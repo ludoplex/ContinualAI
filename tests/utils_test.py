@@ -29,13 +29,13 @@ class datasets_concatenation_tests(unittest.TestCase):
         i = 0
         for i, _ in enumerate(cd):
             pass
-        self.assertTrue(i + 1 == 120000)
+        self.assertTrue(i == 119999)
 
         cd.test()
         i = 0
         for i, _ in enumerate(cd):
             pass
-        self.assertTrue(i + 1 == 20000)
+        self.assertTrue(i == 19999)
 
     def test_dataloader(self):
         def modify_dataset(d):

@@ -54,20 +54,20 @@ class DownloadableDataset(ABC):
         self._name = name
 
         self.transformer = transformer \
-            if transformer is not None else lambda x: x
+                if transformer is not None else lambda x: x
 
         missing = not self._check_exists()
 
         if missing:
-            if not download_if_missing:
-                raise IOError("Data not found and "
-                              "`download_if_missing` is False")
-            else:
+            if download_if_missing:
                 if not exists(self.data_folder):
                     makedirs(self.data_folder)
 
-                print('Downloading dataset {}'.format(self.name))
+                print(f'Downloading dataset {self.name}')
                 self.download_dataset()
+            else:
+                raise IOError("Data not found and "
+                              "`download_if_missing` is False")
 
     @property
     def name(self):
@@ -186,12 +186,12 @@ class ConcatDataset:
             raise ValueError('No datase given')
 
         lens = len(datasets[0][0])
-        cond = all([len(d[0]) == lens for d in datasets])
+        cond = all(len(d[0]) == lens for d in datasets)
 
         if not cond:
-            raise ValueError('The dataset\'s __getitem__ are not comparable, '
-                             'because return different number of values: {}'.
-                             format([len(d[0]) for d in datasets]))
+            raise ValueError(
+                f"The dataset\'s __getitem__ are not comparable, because return different number of values: {[len(d[0]) for d in datasets]}"
+            )
 
         self.datasets = list(datasets)
 

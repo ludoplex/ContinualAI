@@ -10,9 +10,7 @@ from continual_learning.scenarios.tasks import Task
 class base_test(unittest.TestCase):
     def get_dataset(self, n, target=False):
         x = np.random.uniform(-1, 10, n)
-        y = None
-        if target:
-            y = np.random.randint(0, 10, n)
+        y = np.random.randint(0, 10, n) if target else None
         return x, y
 
     def test_instantiating(self):
@@ -24,7 +22,7 @@ class base_test(unittest.TestCase):
         self.assertTrue(dataset.targets is None)
 
         sample = dataset[0]
-        all = [i for i in dataset]
+        all = list(dataset)
 
         self.assertTrue(len(all) == 100)
         self.assertTrue(len(dataset) == 100)
@@ -40,7 +38,7 @@ class base_test(unittest.TestCase):
 
         sample = subset[0]
 
-        all = [i for i in subset]
+        all = list(subset)
 
         self.assertTrue(len(all) == 3)
         self.assertTrue(len(subset) == 3)
@@ -52,8 +50,8 @@ class base_test(unittest.TestCase):
 
         dataset = BaseDataset(values=x, transform=t)
 
-        self.assertTrue(all([i[1] == 0 for i in dataset]))
-        self.assertTrue(not all([i == 0 for i in dataset.values]))
+        self.assertTrue(all(i[1] == 0 for i in dataset))
+        self.assertTrue(any(i != 0 for i in dataset.values))
 
     def test_subset_from_dataset(self):
         x, y = self.get_dataset(100)
@@ -69,16 +67,17 @@ class base_test(unittest.TestCase):
         # splitted_dataset.test()
         # print(len(splitted_dataset))
 
-        self.assertTrue(all([dataset[i][1] == x[i]
-                             for i, v in enumerate([0, 1, 20, 33])]))
+        self.assertTrue(
+            all(dataset[i][1] == x[i] for i, v in enumerate([0, 1, 20, 33]))
+        )
 
         train, test, dev = splitted_dataset.get_subset([0, 1])
 
-        all_train = [i for i in train]
+        all_train = list(train)
         self.assertTrue(len(all_train) == 2)
 
-        all_test = [i for i in test]
-        self.assertTrue(len(all_test) == 0)
+        all_test = list(test)
+        self.assertTrue(not all_test)
 
         sub_subset = splitted_dataset.get_subset([0, 1], test=[0],
                                                  as_splitted_dataset=

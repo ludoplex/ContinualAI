@@ -50,8 +50,7 @@ class BatchEnsemble(BaseMultiTaskGGMethod):
         else:
             for n, m in backbone.named_modules():
                 if isinstance(m, BElayer):
-                    parameters.append(m.tasks_alpha[current_task])
-                    parameters.append(m.tasks_gamma[current_task])
+                    parameters.extend((m.tasks_alpha[current_task], m.tasks_gamma[current_task]))
                 elif isinstance(m, BatchNorm2d):
                     m.track_running_stats = False
                     # parameters.append(m.parameters())

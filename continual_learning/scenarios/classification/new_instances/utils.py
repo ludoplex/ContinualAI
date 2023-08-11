@@ -28,18 +28,17 @@ class NITransformingScenario(TasksGenerator):
                              f'transformation_parameters parameter '
                              f'as callable '
                              f'{type(transformation_parameters)}')
-        else:
-            if tasks_n < 0:
-                raise ValueError(f'Argument tasks_n must be '
-                                 f'greater than 0 '
-                                 f'{type(tasks_n)}')
+        if tasks_n < 0:
+            raise ValueError(f'Argument tasks_n must be '
+                             f'greater than 0 '
+                             f'{type(tasks_n)}')
 
-            if callable(transformation_parameters):
-                transformation_parameters = [
-                    transformation_parameters(task=task,
-                                              random_state=
-                                              self.random_state)
-                    for task in range(tasks_n)]
+        if callable(transformation_parameters):
+            transformation_parameters = [
+                transformation_parameters(task=task,
+                                          random_state=
+                                          self.random_state)
+                for task in range(tasks_n)]
 
         self.infinite_stream = infinite_stream
         self.lazy_initialization = lazy_initialization
@@ -59,10 +58,7 @@ class NITransformingScenario(TasksGenerator):
                 t = self.generate_task()
 
     def __len__(self):
-        if self.infinite_stream:
-            return np.inf
-        else:
-            return self.task_n
+        return np.inf if self.infinite_stream else self.task_n
 
     def __getitem__(self, i: int):
         if i > len(self._tasks_generated):
@@ -88,10 +84,10 @@ class NITransformingScenario(TasksGenerator):
         if self.infinite_stream and callable(self.parameters):
             t_parameters = self.parameters(task=counter,
                                            random_state=self.random_state)
-        else:
-            if counter == self.task_n:
-                return None
+        elif counter == self.task_n:
+            return None
 
+        else:
             t_parameters = self.parameters[counter]
 
         t = self.transform_function(t_parameters)

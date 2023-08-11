@@ -55,7 +55,7 @@ class ElasticWeightConsolidation(BaseMultiTaskGGMethod):
         _s = 0
         cumloss = torch.zeros(1)
 
-        for i, (_, image, label) in enumerate(task):
+        for _, image, label in task:
             emb = encoder(image)
             o = solver(emb, task=task.index)
             cumloss += self.loss(o, label)
@@ -64,11 +64,11 @@ class ElasticWeightConsolidation(BaseMultiTaskGGMethod):
         cumloss = cumloss / _s
         cumloss.backward()
 
-        f_matrix = {}
-        for n, p in itertools.chain(encoder.named_parameters()):
-            if p.requires_grad and p.grad is not None:
-                f_matrix[n] = (deepcopy(p.grad.data) ** 2) / _s
-
+        f_matrix = {
+            n: (deepcopy(p.grad.data) ** 2) / _s
+            for n, p in itertools.chain(encoder.named_parameters())
+            if p.requires_grad and p.grad is not None
+        }
         self.memory.append((final_w, f_matrix))
 
     def before_gradient_calculation(self, current_loss: torch.Tensor, encoder: torch.nn.Module, *args, **kwargs):

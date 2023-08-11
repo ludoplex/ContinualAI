@@ -49,8 +49,7 @@ class MultiHeadsSolver(Solver):
         if task is None:
             task = self.task
         th = self.heads[task]
-        for param in th.parameters(recurse=recuse):
-            yield param
+        yield from th.parameters(recurse=recuse)
 
     @property
     def heads(self):
@@ -64,11 +63,7 @@ class MultiHeadsSolver(Solver):
 
     def forward(self, x, task=None):
 
-        if task is not None:
-            _t = task
-        else:
-            _t = self.task
-
+        _t = task if task is not None else self.task
         if self.flat_input:
             x = torch.flatten(x, 1)
 

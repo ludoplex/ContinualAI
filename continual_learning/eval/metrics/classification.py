@@ -16,5 +16,4 @@ from .base import ClassificationMetric
 class Accuracy(ClassificationMetric):
     def __call__(self, y_true, y_pred, *args, **kwargs):
         eq = np.asarray(y_true) == np.asarray(y_pred)
-        accuracy = eq.sum()/len(y_true)
-        return accuracy
+        return eq.sum()/len(y_true)
